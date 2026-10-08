@@ -1,9 +1,10 @@
 <!doctype html>
-<html lang="zh-Hant">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Stonk Dashboard</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-40 -40 336 336'%3E%3Crect x='-40' y='-40' width='336' height='336' rx='72' fill='%230c0c0c'/%3E%3Cpath fill='%23fff' d='M 0 128 C 70.692 128 128 185.308 128 256 L 64 256 C 64 220.654 35.346 192 0 192 Z M 256 192 C 220.654 192 192 220.654 192 256 L 128 256 C 128 185.308 185.308 128 256 128 Z M 128 0 C 128 70.692 70.692 128 0 128 L 0 64 C 35.346 64 64 35.346 64 0 Z M 192 0 C 192 35.346 220.654 64 256 64 L 256 128 C 185.308 128 128 70.692 128 0 Z'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap">
 <style>
 /* Layout: fixed looping video backdrop → navbar → full-height cinematic hero (shiny headline) → macOS-style status strip → "pulse" (markets, KPIs, movers, theme heat) → app window (sidebar + table) → closing glass CTA with settings.
@@ -118,14 +119,15 @@ input[type=checkbox]{accent-color:var(--brand);width:16px;height:16px}
 .stripin{height:100%;display:flex;align-items:center;justify-content:space-between;font-size:12px;gap:12px}
 .stripl,.stripr{display:flex;align-items:center;gap:16px;min-width:0;white-space:nowrap}
 .stripl b{font-weight:700;color:#fff}
-.stripl a{color:var(--t7);text-decoration:none}
+.stripl a{color:var(--t7);text-decoration:none;padding:12px 2px}
 .stripl a:hover{color:#fff}
 .stripr{color:var(--t6)}
 .dot{width:7px;height:7px;border-radius:50%;background:var(--t4);display:inline-block;margin-right:6px}
 .dot.live{background:var(--down);box-shadow:0 0 8px var(--down)}
-.hide-sm{display:none}.hide-md{display:none}
+.hide-sm{display:none}.hide-md{display:none}.hide-lg{display:none}
 @media(min-width:640px){.hide-sm{display:inline}}
 @media(min-width:768px){.hide-md{display:inline}}
+@media(min-width:1000px){.hide-lg{display:inline}}
 
 /* sections */
 .section{padding-block:56px}
@@ -185,7 +187,8 @@ button.kpi:hover{background:rgba(255,255,255,.05)}
 .compose .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:10px;background:#fff;color:#000;font-size:13px;font-weight:600;padding:9px 12px;border:0;cursor:pointer}
 .compose .btn:hover{background:rgba(255,255,255,.9)}
 .compose .btn:disabled{opacity:.6;cursor:progress}
-.compose input{text-transform:uppercase;font-size:13px;padding:8px 11px}
+.compose input{font-size:13px;padding:8px 11px}
+.compose .combo{flex:1;min-width:0}
 .compose input::placeholder{text-transform:none}
 .navlist{display:flex;flex-direction:column;gap:2px}
 .nav-i{display:flex;align-items:center;gap:10px;width:100%;padding:8px 10px;border-radius:9px;color:var(--t6);font-size:13px;border:0;background:none;cursor:pointer;text-align:left;font-family:var(--sans);font-weight:500}
@@ -329,6 +332,78 @@ footer strong{font-size:13px;font-weight:600}
 .toast.on{opacity:1}
 @media (prefers-reduced-motion:reduce){.toast{transition:none}}
 
+/* v4 additions */
+.aurora{background:radial-gradient(900px 600px at 78% 8%,rgba(0,210,255,.20),transparent 62%),radial-gradient(800px 600px at 8% 30%,rgba(61,129,227,.30),transparent 62%),radial-gradient(700px 500px at 60% 85%,rgba(11,37,81,.75),transparent 65%),var(--bg);background-size:150% 150%;animation:aur 26s ease-in-out infinite alternate}
+@keyframes aur{0%{background-position:0% 0%}100%{background-position:100% 70%}}
+@media (prefers-reduced-motion:reduce){.aurora{animation:none}}
+details.acc>summary{display:none}
+.welcome{border-radius:20px;padding:20px 22px;margin-bottom:18px;display:flex;flex-direction:column;gap:10px}
+.welcome h3{font-size:18px;font-weight:600;letter-spacing:-.01em}
+.welcome p{font-size:14px;color:var(--t6)}
+.welcome ul{margin:0;padding-left:18px;color:var(--t7);font-size:14px;display:flex;flex-direction:column;gap:4px}
+.welcome .row{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px}
+.tips>summary{cursor:pointer;font-size:13px;font-weight:600;color:var(--t7);list-style:none;margin-bottom:6px}
+.tips>summary::-webkit-details-marker{display:none}
+.tips>summary::after{content:' ▾';color:var(--t5)}
+.tips:not([open])>summary::after{content:' ▸'}
+.combo{position:relative}
+.sugg{position:absolute;z-index:40;left:0;top:calc(100% + 6px);margin:0;padding:6px;list-style:none;background:rgba(18,20,26,.985);border:1px solid var(--line2);border-radius:12px;box-shadow:0 18px 50px rgba(0,0,0,.75);max-height:340px;overflow:auto;width:min(340px,calc(100vw - 48px))}
+.sugg li{display:grid;grid-template-columns:auto minmax(0,1fr);gap:0 10px;padding:8px 10px;border-radius:8px;cursor:pointer;align-items:baseline}
+.sugg li[aria-selected="true"],.sugg li:hover{background:rgba(255,255,255,.09)}
+.sugg b{font-weight:600}
+.sugg span{font-size:13px;color:var(--t6);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sugg small{grid-column:2;font-size:11px;color:var(--t4)}
+.sugg li.st{display:block;color:var(--t5);font-size:13px;cursor:default;background:none}
+.moreRow{display:flex;gap:10px;justify-content:center;align-items:center;padding:14px;border-top:1px solid var(--line);flex-wrap:wrap}
+.bk{border-radius:20px;margin-top:20px;padding:22px;display:flex;flex-direction:column;gap:16px}
+.bk h3{font-size:18px;font-weight:600}
+.bk .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.bk .box{border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px;background:rgba(255,255,255,.02);min-width:0}
+.bk .code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:16px;letter-spacing:.08em;background:rgba(0,0,0,.35);border:1px solid var(--line);border-radius:10px;padding:10px 12px;word-break:break-all;user-select:all}
+@media(max-width:860px){.bk .grid2{grid-template-columns:1fr}}
+.chip{min-height:30px}
+@media (pointer:coarse){
+  .chip{padding:8px 14px;min-height:38px}
+  .star{width:38px;height:38px;font-size:19px}
+  .flag{width:40px;height:40px}
+  .act{padding:9px 14px;min-height:38px}
+  .nav-i{padding:12px 12px}
+  .lab{padding:10px 10px}
+  .mv{padding:12px 2px}
+  input[type=search],input[type=text],select{min-height:44px}
+  th button{padding:8px 2px}
+  .pill.sm{min-height:40px}
+  input[type=checkbox]{width:22px;height:22px}
+}
+/* google sign-in */
+.gbtn{min-height:44px;display:flex;align-items:center}
+.acct{display:flex;gap:12px;align-items:center}
+.acct .av{width:36px;height:36px;border-radius:50%;background:var(--grad-btn,linear-gradient(135deg,#bcd2ff,#5b86e8));color:#04101f;display:flex;align-items:center;justify-content:center;font-weight:700;flex:none}
+.acct b{font-weight:600;display:block}
+.codeSync{margin-top:6px}
+.codeSync>summary{cursor:pointer;font-size:13px;color:var(--t6);list-style:none}
+.codeSync>summary::-webkit-details-marker{display:none}
+.codeSync>summary::before{content:'▸ ';color:var(--t5)}
+.codeSync[open]>summary::before{content:'▾ '}
+.codeSync.plain>summary{display:none}
+.codeSync .cs{display:flex;flex-direction:column;gap:10px;margin-top:10px}
+.gchoose{border:1px solid rgba(0,210,255,.45);background:rgba(0,210,255,.06);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+/* guided tour */
+.tourbtn{width:24px;height:24px;border-radius:50%;border:1px solid var(--line2);background:rgba(255,255,255,.05);color:var(--t7);font-size:12px;font-weight:600;cursor:pointer;line-height:1;padding:0}
+.tourbtn:hover{border-color:var(--cy);color:#fff}
+.tour{position:fixed;inset:0;z-index:70}
+.tour-hole{position:fixed;border-radius:16px;box-shadow:0 0 0 9999px rgba(2,4,9,.78),0 0 0 2px rgba(0,210,255,.85),0 0 28px 4px rgba(0,210,255,.35);pointer-events:none;transition:left .25s ease,top .25s ease,width .25s ease,height .25s ease}
+.tour-card{position:fixed;width:min(360px,calc(100vw - 24px));border-radius:18px;padding:18px 18px 14px;background:rgba(14,16,20,.97);display:flex;flex-direction:column;gap:8px;box-shadow:0 24px 70px rgba(0,0,0,.8)}
+.tour-card h3{font-size:17px;font-weight:600;letter-spacing:-.01em}
+.tour-card p{font-size:14px;color:var(--t7);line-height:1.55}
+.tour-card .tour-n{font-size:11px;letter-spacing:.16em;color:var(--cy);font-weight:600;text-transform:uppercase}
+.tour-card .row{display:flex;gap:8px;justify-content:space-between;align-items:center;margin-top:6px}
+.tour-card .row div{display:flex;gap:8px}
+.tour-dots{display:flex;gap:5px;margin-top:2px}
+.tour-dots i{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.2)}
+.tour-dots i.on{background:var(--cy)}
+@media (prefers-reduced-motion:reduce){.tour-hole{transition:none}}
+@media(max-width:720px){.tour-card{left:12px!important;right:12px;top:auto!important;bottom:12px;width:auto}}
 /* responsive */
 @media(max-width:1024px){.pulse{grid-template-columns:1fr}}
 @media(max-width:900px){
@@ -344,10 +419,22 @@ footer strong{font-size:13px;font-weight:600}
   .section{padding-block:40px}
   .kpi dd,.kpi .val{font-size:26px}
   .movers{grid-template-columns:1fr}
-  .mkgrid{grid-template-columns:repeat(2,1fr)}
-  .mk:last-child:nth-child(odd){grid-column:1/-1}
+  .mkgrid{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:10px;padding-bottom:6px;margin-inline:-24px;padding-inline:24px;scroll-padding-inline:24px;scrollbar-width:none}
+  .mkgrid::-webkit-scrollbar{display:none}
+  .mk{flex:0 0 176px;scroll-snap-align:start}
   .cta{padding:44px 20px}
+  .hero{min-height:auto;padding-block:28px 40px}
+  .hero p.lead{margin-top:20px;font-size:15px}
+  .hero .ctas{margin-top:24px}
+  .scrollcue{display:none}
+  details.acc>summary{display:flex;align-items:center;justify-content:space-between;list-style:none;cursor:pointer;padding:14px 16px;border-radius:14px;font-weight:600;font-size:14px;border:1px solid var(--line);background:rgba(255,255,255,.03)}
+  details.acc>summary::-webkit-details-marker{display:none}
+  details.acc>summary::after{content:'+';color:var(--t5);font-size:18px}
+  details.acc[open]>summary::after{content:'–'}
+  details.acc[open]>summary{margin-bottom:12px}
+  .movers{margin-top:12px}
 }
+@media(max-width:480px){.hide-xs{display:none}.stripl{gap:12px}}
 </style>
 
 </head>
@@ -362,7 +449,7 @@ footer strong{font-size:13px;font-weight:600}
 </svg>
 
 <div class="wrapper">
-  <div class="bgvid"><video autoplay loop muted playsinline webkit-playsinline preload="auto" disablepictureinpicture disableremoteplayback controlslist="nodownload nofullscreen noremoteplayback" tabindex="-1" aria-hidden="true" src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260508_064122_c4750c0e-7476-4b44-94a2-a85a65c63bf2.mp4"></video></div>
+  <div class="bgvid"><video autoplay loop muted playsinline webkit-playsinline preload="auto" disablepictureinpicture disableremoteplayback controlslist="nodownload nofullscreen noremoteplayback" tabindex="-1" aria-hidden="true" data-src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260508_064122_c4750c0e-7476-4b44-94a2-a85a65c63bf2.mp4"></video></div>
   <div class="bgshade"></div>
   <div class="guide l"></div><div class="guide r"></div>
 
@@ -377,12 +464,13 @@ footer strong{font-size:13px;font-weight:600}
           <a href="#themes" style="animation-delay:.15s">Themes</a>
           <a href="#movers" style="animation-delay:.20s">Movers</a>
           <a href="#dash" style="animation-delay:.25s">Dashboard</a>
-          <a href="#settings" style="animation-delay:.30s">Settings</a>
+          <a href="#backup" style="animation-delay:.30s">Backup</a>
         </nav>
         <button class="pill navcta js-refresh" type="button">Refresh prices <svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></button>
         <button class="menubtn" id="menuBtn" type="button" aria-label="Menu" aria-expanded="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
         <div class="mobnav" id="mobNav" hidden>
-          <a href="#markets">Markets</a><a href="#themes">Themes</a><a href="#movers">Movers</a><a href="#dash">Dashboard</a><a href="#settings">Settings</a>
+          <a href="#markets">Markets</a><a href="#themes">Themes</a><a href="#movers">Movers</a><a href="#dash">Dashboard</a><a href="#backup">Backup</a>
+          <button class="pill ghost" type="button" data-tour="1">Take the tour</button>
           <button class="pill js-refresh" type="button">Refresh prices</button>
         </div>
       </div>
@@ -402,22 +490,36 @@ footer strong{font-size:13px;font-weight:600}
       <div class="max stripin">
         <div class="stripl">
           <svg width="14" height="14" viewBox="0 0 256 256" fill="#fff" aria-hidden="true"><path d="M 0 128 C 70.692 128 128 185.308 128 256 L 64 256 C 64 220.654 35.346 192 0 192 Z M 256 192 C 220.654 192 192 220.654 192 256 L 128 256 C 128 185.308 185.308 128 256 128 Z M 128 0 C 128 70.692 70.692 128 0 128 L 0 64 C 35.346 64 64 35.346 64 0 Z M 192 0 C 192 35.346 220.654 64 256 64 L 256 128 C 185.308 128 128 70.692 128 0 Z"/></svg>
-          <b>Stonk</b>
-          <a href="#markets">Markets</a><a href="#movers">Movers</a><a class="hide-sm" href="#themes">Themes</a><a class="hide-md" href="#dash">Dashboard</a><a class="hide-md" href="#settings">Help</a>
+          <b class="hide-xs">Stonk</b>
+          <a href="#markets">Markets</a><a class="hide-sm" href="#movers">Movers</a><a class="hide-md" href="#themes">Themes</a><a href="#dash">Dashboard</a><a class="hide-lg" href="#backup">Backup</a>
         </div>
         <div class="stripr">
-          <span><i class="dot" id="stripDot"></i><span id="stripState">Snapshot</span></span>
-          <span class="hide-sm" id="updated"></span>
-          <span id="clock"></span>
+          <span><i class="dot" id="mktDot"></i><span id="mktState">Market</span></span>
+          <span class="hide-md" id="updated"></span>
+          <span class="hide-lg" id="clock"></span>
+          <button class="tourbtn" id="tourBtn" type="button" data-tour="1" aria-label="Take the guided tour" title="Take the guided tour">?</button>
         </div>
       </div>
     </div>
 
     <main>
       <section class="section max" id="markets" aria-label="Markets">
+        <div class="welcome liquid-glass" id="welcome" hidden>
+          <h3>Welcome. You are looking at a starter list.</h3>
+          <p>This list comes from the owner’s research sheet. Keep it and edit it freely, or start empty and add your own stocks.</p>
+          <details class="tips" open>
+            <summary>Quick tips</summary>
+            <ul>
+              <li>Click any ticker for a one-year chart, the 52-week range and your notes.</li>
+              <li>Click an SA or FT target cell to type your own analyst target. Upside recalculates instantly.</li>
+              <li>Your changes stay in this browser. Turn on Backup &amp; sync at the bottom of the page to keep them safe.</li>
+            </ul>
+          </details>
+          <div class="row"><button class="pill sm" type="button" data-tour="1">Take the 1-minute tour</button><button class="pill sm ghost" id="wKeep" type="button">Keep starter list</button><button class="pill sm ghost" id="wEmpty" type="button">Start with an empty list</button></div>
+        </div>
         <div class="notice" id="liveNotice" hidden>Live quotes are not connected yet, so you are seeing an older sheet snapshot. Open “Quote source” at the bottom of the page and paste your service URL.</div>
         <div class="sechead">
-          <div class="eyebrow"><i></i>Markets<span class="tg">Live</span></div>
+          <div class="eyebrow"><i></i>Markets<span class="tg">Live</span><span class="note" id="asof"></span></div>
           <div class="chips" id="mkchips"></div>
         </div>
         <div class="mkgrid" id="mkgrid"></div>
@@ -428,14 +530,20 @@ footer strong{font-size:13px;font-weight:600}
           <div>
             <div class="eyebrow" id="movers" style="margin-bottom:14px"><i></i>Movers<span class="tg">Today</span></div>
             <dl class="kpis liquid-glass" id="stats" style="border-radius:20px"></dl>
-            <div class="movers" id="moversBox" aria-label="Top movers"></div>
+            <details class="acc" id="accMovers" open>
+              <summary>Top movers today</summary>
+              <div class="movers" id="moversBox" aria-label="Top movers"></div>
+            </details>
           </div>
-          <div class="mz liquid-glass" id="themes" style="border-radius:20px">
-            <div class="eyebrow"><i></i>Themes<span class="tg">Heat map</span></div>
-            <div class="mosaic" id="mosaic" role="group" aria-label="Theme heat mosaic. Click a block to filter by theme."></div>
-            <div class="chips" id="mchips"></div>
-            <p class="note" id="mzSub"></p>
-          </div>
+          <details class="acc" id="accThemes" open>
+            <summary>Theme heat map</summary>
+            <div class="mz liquid-glass" id="themes" style="border-radius:20px">
+              <div class="eyebrow"><i></i>Themes<span class="tg">Heat map</span></div>
+              <div class="mosaic" id="mosaic" role="group" aria-label="Theme heat mosaic. Click a block to filter by theme."></div>
+              <div class="chips" id="mchips"></div>
+              <p class="note" id="mzSub"></p>
+            </div>
+          </details>
         </div>
       </section>
 
@@ -449,7 +557,10 @@ footer strong{font-size:13px;font-weight:600}
           <div class="winbody">
             <aside class="side" aria-label="Lists">
               <form class="compose" id="addForm" autocomplete="off">
-                <input type="text" id="f_ticker" maxlength="12" placeholder="Add ticker, e.g. AVGO" aria-label="Add stock ticker" required>
+                <div class="combo">
+                  <input type="text" id="f_ticker" maxlength="40" placeholder="Add a ticker or company" aria-label="Add a stock by ticker or company name" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="sugg" autocomplete="off" autocapitalize="off" spellcheck="false" required>
+                  <ul class="sugg" id="sugg" role="listbox" aria-label="Matching companies" hidden></ul>
+                </div>
                 <button class="btn" type="submit" id="addBtn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/></svg>Add stock</button>
               </form>
               <div class="navlist" role="tablist" aria-label="Lists" id="tabs"></div>
@@ -474,23 +585,90 @@ footer strong{font-size:13px;font-weight:600}
               </div>
               <div class="tbl" id="tbl"></div>
               <div class="cards" id="cards" hidden></div>
+              <div class="moreRow" id="moreRow" hidden></div>
               <p class="note legend" id="legend">Red = up, green = down. To high = 52-week high ÷ price − 1. Upside = target ÷ price − 1; Avg = mean of the two upsides. Click a ticker for details; click SA / FT targets, notes, sector or theme to edit them; click the date in a target header to change it; ☆ pins a row. On desktop, drag a row onto a list in the sidebar to move it; on mobile use the row buttons.</p>
             </div>
           </div>
         </div>
       </section>
 
-      <section class="section max" id="settings" aria-label="Settings">
+      <section class="section max" id="backup" aria-label="Backup and sync">
         <div class="cta liquid-glass">
           <h2>Watch closely.<br>Move calmly.</h2>
-          <p>Prices come from your own Google service, refresh while the page is open, and stay private to this browser. No sign-in, no downloads.</p>
+          <p>Prices come from a Google service and refresh while the page is open. Your list stays in this browser unless you turn on sync below.</p>
           <div class="row">
             <button class="pill js-refresh" type="button">Refresh prices <svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></button>
             <a class="pill ghost" href="#dash" style="text-decoration:none">Back to dashboard <svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></a>
           </div>
         </div>
+
+        <div class="bk liquid-glass dk" id="bkcard">
+          <div>
+            <h3>Backup &amp; sync</h3>
+            <p class="note" style="font-size:13px;margin-top:4px">Your list is saved in this browser automatically. Download a backup file, or turn on sync to keep the same list on all your devices.</p>
+          </div>
+          <div class="grid2">
+            <div class="box">
+              <p class="sec-t">Backup file</p>
+              <p class="note">Download your list as a file, or restore it from one.</p>
+              <div class="keyrow">
+                <button class="pill sm" id="bkExport" type="button">Download backup</button>
+                <label class="pill sm ghost" style="cursor:pointer">Restore from file<input type="file" id="bkFile" accept="application/json,.json" hidden></label>
+              </div>
+              <p class="note" id="bkMsg" role="status"></p>
+            </div>
+            <div class="box">
+              <p class="sec-t">Sync across devices</p>
+              <div id="gBox" hidden>
+                <div id="gOut">
+                  <p class="note">Sign in with Google and your list follows you to every device. No codes to copy, and only your account can open your saved list.</p>
+                  <div class="gbtn" id="gBtn"></div>
+                </div>
+                <div id="gIn" hidden>
+                  <div class="acct"><span class="av" id="gAv" aria-hidden="true">?</span><div><b id="gName"></b><span class="note" id="gEmail"></span></div></div>
+                  <p class="note">Sync is on. Changes you make here appear on every device where you sign in.</p>
+                  <div class="keyrow">
+                    <button class="pill sm ghost" id="gNow" type="button">Sync now</button>
+                    <button class="pill sm ghost" id="gSignOut" type="button">Sign out</button>
+                    <button class="pill sm ghost" id="gDel" type="button">Delete cloud copy</button>
+                  </div>
+                </div>
+                <div class="gchoose" id="gChoose" hidden>
+                  <p class="note" style="color:var(--fg)" id="gChooseText">We found a saved list in your account.</p>
+                  <div class="keyrow">
+                    <button class="pill sm" id="gUseCloud" type="button">Use the saved list</button>
+                    <button class="pill sm ghost" id="gKeepLocal" type="button">Keep this device’s list</button>
+                  </div>
+                </div>
+              </div>
+              <details class="codeSync" id="codeSync">
+                <summary>Use a sync code instead</summary>
+                <div class="cs">
+                  <div id="syncOff">
+                    <p class="note">Sync saves your list in the owner’s Google service under a private code. Anyone who has your code can read and replace your list, so keep it to yourself. The owner could technically see saved lists.</p>
+                    <div class="keyrow" style="margin-top:8px"><button class="pill sm" id="syncOn" type="button">Turn on sync</button></div>
+                    <div class="keyrow" style="margin-top:10px"><div class="grow"><input type="text" id="syncCodeIn" placeholder="Have a code? Enter it here" autocomplete="off" spellcheck="false" aria-label="Sync code"></div><button class="pill sm ghost" id="syncConnect" type="button">Connect</button></div>
+                  </div>
+                  <div id="syncOnBox" hidden>
+                    <p class="note">Sync is on. Enter this code on your other devices:</p>
+                    <div class="code" id="syncCode"></div>
+                    <div class="keyrow">
+                      <button class="pill sm ghost" id="syncCopy" type="button">Copy code</button>
+                      <button class="pill sm ghost" id="syncNow" type="button">Sync now</button>
+                      <button class="pill sm ghost" id="syncStop" type="button">Turn off</button>
+                      <button class="pill sm ghost" id="syncDel" type="button">Delete cloud copy</button>
+                    </div>
+                  </div>
+                </div>
+              </details>
+              <p class="note" id="syncMsg" role="status"></p>
+            </div>
+          </div>
+          <div class="keyrow"><button class="pill sm ghost" id="bkReset" type="button">Restore starter list</button><span class="note">Replaces your current list with the original starter list.</span></div>
+        </div>
+
         <details class="set liquid-glass dk" id="live">
-          <summary id="liveSum">Quote source</summary>
+          <summary id="liveSum">Advanced · Quote source</summary>
           <div class="in">
             <p class="note">Prices are served by a Google Apps Script web app. After deploying it, paste the URL (ending in <code>/exec</code>) here. It is stored only in this browser.</p>
             <div class="keyrow">
@@ -500,12 +678,12 @@ footer strong{font-size:13px;font-weight:600}
             </div>
             <label class="chk"><input type="checkbox" id="k_auto" checked> Auto-refresh the current list while this page is open (every minute for up to 30 stocks, every 10 minutes for more)</label>
             <p class="note" id="liveStatus"></p>
-            <p class="note">Available: price, daily and period returns, 52-week high and low, market indices, one-year charts, company names for new tickers. Not available: SA and FT analyst targets — type them into the table yourself. Quotes can be delayed by a few minutes and do not change while the US market is closed.</p>
+            <p class="note">Available: price, daily and period returns, 52-week high and low, market indices, one-year charts, company search. Not available: SA and FT analyst targets — type them into the table yourself. Quotes can be delayed by a few minutes and do not change while the US market is closed.</p>
           </div>
         </details>
         <footer>
           <strong>Prices may be delayed. For reference only — not investment advice.</strong>
-          <p class="note">Anything you add, move, edit, pin or annotate is stored only in this browser and disappears if you clear site data.</p>
+          <p class="note">Anything you add, move, edit, pin or annotate is stored in this browser (and in the cloud only if you turn on sync). Clearing site data removes the local copy.</p>
         </footer>
       </section>
     </main>
@@ -527,6 +705,19 @@ footer strong{font-size:13px;font-weight:600}
   <div class="sheet big liquid-glass dk" id="dtSheet"></div>
 </div>
 
+<div class="tour" id="tour" hidden>
+  <div class="tour-hole" id="tourHole"></div>
+  <div class="tour-card liquid-glass dk" id="tourCard" role="dialog" aria-modal="true" aria-labelledby="tourT">
+    <p class="tour-n" id="tourN"></p>
+    <h3 id="tourT"></h3>
+    <p id="tourB"></p>
+    <div class="tour-dots" id="tourDots" aria-hidden="true"></div>
+    <div class="row">
+      <button class="pill sm ghost" id="tourSkip" type="button">Skip tour</button>
+      <div><button class="pill sm ghost" id="tourBack" type="button">Back</button><button class="pill sm" id="tourNext" type="button">Next</button></div>
+    </div>
+  </div>
+</div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
@@ -534,6 +725,8 @@ footer strong{font-size:13px;font-weight:600}
 'use strict';
 // Deployed Apps Script URL. Leave empty and each visitor pastes their own at the bottom of the page.
 var QUOTE_URL='https://script.google.com/macros/s/AKfycbxWTt8kf2vjWE9tUeB7GkE8Sfxxd-U0uAQfmljPGJ7Vmer-PD4VsGShh9gE_UZ1rjujAQ/exec';
+// Google OAuth Client ID for "Sign in with Google" sync (a public identifier, not a secret). Empty = sign-in is hidden and sync codes are used.
+var GOOGLE_CLIENT_ID='859298934575-1530v0u3kqbqrium1shdnmfhd3knsgem.apps.googleusercontent.com';
 var KEY='stonk-dashboard-v3',URL_KEY='stonk-quote-url',AUTO_KEY='stonk-auto';
 var TABS=[{id:'watch',label:'Watchlist',ic:'<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>'},
           {id:'port',label:'Holdings',ic:'<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/>'},
@@ -544,6 +737,8 @@ var PK=PERF.map(function(p){return p[0];});
 var PLABEL={};PERF.forEach(function(p){PLABEL[p[0]]=p[1];});
 var HEAT={d1:3,w1:6,m1:10,m3:15,m6:25,ytd:25};
 var NUMEDIT=['sa','ft'];
+var TIPS={d1:'Change vs the previous close',w1:'Change vs 7 days ago',m1:'Change vs 1 month ago',m3:'Change vs 3 months ago',m6:'Change vs 6 months ago',ytd:'Change since the first trading day of the year',toHigh:'52-week high ÷ price − 1',saUp:'SA target ÷ price − 1',ftUp:'FT target ÷ price − 1',avg:'Average of the two upsides',sa:'Analyst target price (SA). Click a cell to edit.',ft:'Analyst target price (FT). Click a cell to edit.'};
+function tipAttr(c){return TIPS[c.k]?' title="'+esc(TIPS[c.k])+'"':'';}
 var STRKEYS=['ticker','sector','theme','name','sub','l2','s2','note'];
 var LEV_BAD=['avg','saUp','ftUp','sa','ft','sector','theme','sub','l2','s2','int','conv'];
 var MARKETS=[['^GSPC','S&P 500',2],['^IXIC','Nasdaq',2],['^SOX','Philadelphia Semis',2],['^VIX','VIX',2],['USDTWD=X','USD / TWD',3]];
@@ -573,24 +768,30 @@ function lsGet(k){try{return localStorage.getItem(k);}catch(e){return null;}}
 function lsSet(k,v){try{localStorage.setItem(k,v);}catch(e){}}
 function lsDel(k){try{localStorage.removeItem(k);}catch(e){}}
 
-var S={rows:seed(),updated:SEED_META.updated,dates:cloneDates(),hidden:null,tab:'watch',sort:{k:'ytd',dir:-1},q:'',sector:'',theme:'',pinOnly:false,open:{},mz:'ytd',mkt:{},mser:{},mkr:'3m'};
+var S={rows:seed(),updated:SEED_META.updated,dates:cloneDates(),hidden:null,tab:'watch',sort:{k:'ytd',dir:-1},q:'',sector:'',theme:'',pinOnly:false,open:{},mz:'ytd',mkt:{},mser:{},mkr:'3m',updatedAt:0,modAt:0,limit:60,lastKey:''};
+var FIRST=!lsGet(KEY)&&lsGet('stonk-welcome')!=='1';
+function pageSize(){return window.matchMedia('(max-width:720px)').matches?30:60;}
 (function load(){
   try{var raw=lsGet(KEY);if(!raw)return;var d=JSON.parse(raw);
-    if(d&&Array.isArray(d.rows)){S.rows=d.rows;S.updated=normUpdated(d.updated);if(d.dates)S.dates=d.dates;if(d.hidden)S.hidden=d.hidden;
+    if(d&&Array.isArray(d.rows)){S.rows=d.rows;S.updated=normUpdated(d.updated);S.updatedAt=d.ua||0;S.modAt=d.ma||0;if(d.dates)S.dates=d.dates;if(d.hidden)S.hidden=d.hidden;
       // One-time theme refresh: apply the new classification to saved rows you have not edited yourself.
       if(d.tv!==THEME_VER){
         var sm={};seed().forEach(function(r){if(r.tab!=='lev'&&!sm[r.ticker])sm[r.ticker]=r;});
         S.rows.forEach(function(r){var s=sm[r.ticker];if(!s||r.tab==='lev'||r.thEdited)return;r.theme=s.theme;r.sector=s.sector;if(s.sub)r.sub=s.sub;});
       }}}catch(e){}
 })();
-function save(){lsSet(KEY,JSON.stringify({rows:S.rows,updated:S.updated,dates:S.dates,hidden:S.hidden,tv:THEME_VER}));}
+function save(){lsSet(KEY,JSON.stringify({rows:S.rows,updated:S.updated,ua:S.updatedAt,ma:S.modAt,dates:S.dates,hidden:S.hidden,tv:THEME_VER}));}
+// Call touch() after anything the user changes (not for price refreshes): it saves locally and queues a cloud sync.
+function touch(){S.modAt=Date.now();save();if(typeof syncSchedule==='function')syncSchedule();}
 save();
 
 var $=function(id){return document.getElementById(id);};
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
 function num(v){if(v===null||v===undefined||v==='')return null;var x=parseFloat(String(v).replace(/,/g,''));return isFinite(x)?x:null;}
 function fmt(v,d){return v==null?'—':v.toLocaleString('en-US',{minimumFractionDigits:d==null?2:d,maximumFractionDigits:d==null?2:d});}
-function pct(v,d){return v==null?'—':(v>0?'+':'')+v.toFixed(d==null?1:d)+'%';}
+function pctPlain(v,d){return v==null?'—':(v>0?'+':'')+v.toFixed(d==null?1:d)+'%';}
+// Changes carry an arrow as well as a colour, so they still read for colour-blind users.
+function pct(v,d){if(v==null)return '—';return (v>0?'▲ ':(v<0?'▼ ':''))+Math.abs(v).toFixed(d==null?1:d)+'%';}
 function toast(msg){var t=$('toast');t.textContent=msg;t.classList.add('on');clearTimeout(toast.h);toast.h=setTimeout(function(){t.classList.remove('on');},3600);}
 function byId(id){return S.rows.filter(function(r){return r.id===id;})[0];}
 function sleep(ms){return new Promise(function(res){setTimeout(res,ms);});}
@@ -652,7 +853,7 @@ function cell(r,c,d){
     case 'numEd':return {cls:'n',html:ed(r,k,fmt(r[k]))};
     case 'num':return {cls:'n',html:(k==='price'&&r.quoteAt)?'<span title="Quote time '+esc(new Date(r.quoteAt).toLocaleString('en-US',{hour12:false}))+'">'+fmt(r[k])+'</span>':fmt(r[k])};
     case 'pct':x=P(r,k);return {cls:'n'+tone(x)+heat(k,x),html:pct(x)};
-    case 'calc':x=d[k];return {cls:'n'+(c.plain?'':tone(x))+(c.bold?' strong':''),html:pct(x,0)};
+    case 'calc':x=d[k];return {cls:'n'+(c.plain?'':tone(x))+(c.bold?' strong':''),html:c.plain?pctPlain(x,0):pct(x,0)};
     case 'fee':return {cls:'n',html:r.fee==null?'—':r.fee.toFixed(2)+'%'};
     case 'flag':return {cls:'ctr',html:'<button class="flag" type="button" data-flag="'+k+'" data-id="'+r.id+'" aria-pressed="'+(r[k]?'true':'false')+'" aria-label="'+esc(r.ticker+' '+c.l)+'">'+(r[k]?'✓':'○')+'</button>'};
     case 'link':return {cls:'txt',html:/^https:\/\//.test(r.link||'')?'<a href="'+esc(r.link)+'" target="_blank" rel="noopener">Report</a>':'—'};
@@ -845,7 +1046,7 @@ function renderStats(){
     h+='<div class="kpi"><dt>Avg upside</dt><dd class="'+tone(m).trim()+'">'+pct(m)+'</dd></div>';
   }else{
     var tx=all.map(function(r){return calc(r).toHigh;}).filter(function(v){return v!=null;});
-    h+='<div class="kpi"><dt>Avg to high</dt><dd>'+pct(tx.length?tx.reduce(function(a,b){return a+b;},0)/tx.length:null,0)+'</dd></div>';
+    h+='<div class="kpi"><dt>Avg to high</dt><dd>'+pctPlain(tx.length?tx.reduce(function(a,b){return a+b;},0)/tx.length:null,0)+'</dd></div>';
   }
   function one(r,label){
     if(!r)return '<div class="kpi"><dt>'+label+'</dt><dd>—</dd></div>';
@@ -868,12 +1069,25 @@ function renderMovers(){
   };
   box.innerHTML=col(lab+' · top 5 gainers',rows.slice(0,5))+col(lab+' · top 5 losers',rows.slice(-5).reverse());
 }
-function emptyHTML(){return '<div class="empty">No matching stocks. Clear the search or filters, or add a ticker in the sidebar.</div>';}
+function emptyHTML(){
+  if(!tabRows().length)return '<div class="empty">This list is empty. Search a company name or ticker in the sidebar to add your first stock.</div>';
+  return '<div class="empty">No matching stocks. Clear the search or filters, or add a ticker in the sidebar.</div>';
+}
 
 function renderTable(){
-  var rows=visibleRows(),cs=visCols(S.tab);
+  var all=visibleRows(),cs=visCols(S.tab);
+  // Start from a short page whenever the view changes (tab, search, filters, sort); "Show more" extends it.
+  var vk=[S.tab,S.q,S.sector,S.theme,S.pinOnly,S.sort?S.sort.k+S.sort.dir:'',MQ.matches].join('|');
+  if(vk!==S.lastKey){S.lastKey=vk;S.limit=pageSize();}
+  var rows=all.slice(0,S.limit);
   renderStats();renderMovers();renderMosaic();renderMarkets();renderLabs();
-  $('countNote').textContent='Showing '+rows.length+' of '+tabRows().length+((S.q.trim()&&(S.sector||S.theme))?' (search ignores the sector and theme filters)':'');
+  $('countNote').textContent='Showing '+rows.length+' of '+all.length+(all.length!==tabRows().length?' matches ('+tabRows().length+' in list)':'')+((S.q.trim()&&(S.sector||S.theme))?' · search ignores the sector and theme filters':'');
+  var mr=$('moreRow');
+  if(all.length>rows.length){
+    var left=all.length-rows.length,step=Math.min(pageSize(),left);
+    mr.hidden=false;
+    mr.innerHTML='<button class="pill sm" type="button" data-more="1">Show '+step+' more</button>'+(left>step?'<button class="pill sm ghost" type="button" data-moreall="1">Show all '+all.length+'</button>':'');
+  }else{mr.hidden=true;mr.innerHTML='';}
   if(MQ.matches){
     $('tbl').hidden=true;$('cards').hidden=false;
     $('cards').innerHTML=rows.length?rows.map(cardHTML).join(''):emptyHTML();
@@ -883,7 +1097,7 @@ function renderTable(){
   var drag=S.tab!=='lev';
   var head='<tr>'+cs.map(function(c){
     var sorted=S.sort&&S.sort.k===c.k;
-    return '<th scope="col" aria-sort="'+(sorted?(S.sort.dir>0?'ascending':'descending'):'none')+'"><button type="button" data-sort="'+c.k+'">'+esc(c.l)+' <span aria-hidden="true">'+(sorted?(S.sort.dir>0?'▲':'▼'):'')+'</span></button>'+dateSpan(c)+'</th>';
+    return '<th scope="col" aria-sort="'+(sorted?(S.sort.dir>0?'ascending':'descending'):'none')+'"'+tipAttr(c)+'><button type="button" data-sort="'+c.k+'">'+esc(c.l)+' <span aria-hidden="true">'+(sorted?(S.sort.dir>0?'▲':'▼'):'')+'</span></button>'+dateSpan(c)+'</th>';
   }).join('')+'<th scope="col"><span class="sr">Actions</span></th></tr>';
   var body=rows.map(function(r){
     var d=calc(r);
@@ -900,7 +1114,7 @@ function cardHTML(r){
   var d=calc(r),lev=r.tab==='lev',open=!!S.open[r.id];
   var d1=P(r,'d1'),ytd=P(r,'ytd');
   var stats='<span>YTD<b class="'+tone(ytd).trim()+'">'+pct(ytd)+'</b></span>'+
-    (lev?'<span>To high<b>'+pct(d.toHigh,0)+'</b></span>':'<span>Avg upside<b class="'+tone(d.avg).trim()+'">'+pct(d.avg,0)+'</b></span>');
+    (lev?'<span>To high<b>'+pctPlain(d.toHigh,0)+'</b></span>':'<span>Avg upside<b class="'+tone(d.avg).trim()+'">'+pct(d.avg,0)+'</b></span>');
   var more=visCols(r.tab).filter(function(c){return c.k!=='ticker';}).map(function(c){
     var o=cell(r,c,d);return '<div class="kv'+(c.kind==='note'?' wide':'')+'"><i>'+esc(c.l)+dateSpan(c)+'</i><span class="'+o.cls+'">'+o.html+'</span></div>';
   }).join('');
@@ -911,21 +1125,35 @@ function cardHTML(r){
     '<div class="card-stats">'+stats+'</div>'+
     '<div class="more"'+(open?'':' hidden')+'><div class="kvs">'+more+'</div><div class="acts"><button class="act" type="button" data-pin="'+r.id+'">'+(r.pin?'★ Unpin':'☆ Pin')+'</button>'+actHTML(r)+'</div></div></article>';
 }
-function renderMeta(){
-  var live=S.updated.indexOf('Updated')===0;
-  $('updated').textContent=S.updated;
-  $('stripState').textContent=live?'Live':'Snapshot';
-  $('stripDot').classList.toggle('live',live);
-  $('liveNotice').hidden=hasLive();
+function relTime(ms){var s=Math.floor(ms/1000);if(s<45)return 'just now';var m=Math.round(s/60);if(m<60)return m+' min ago';var h=Math.round(m/60);if(h<24)return h+' h ago';return Math.round(h/24)+' d ago';}
+// US market hours in New York time; also requires the S&P 500 quote to be fresh, which handles holidays.
+function marketState(){
+  var p={};
+  try{new Intl.DateTimeFormat('en-US',{timeZone:'America/New_York',weekday:'short',hour:'numeric',minute:'numeric',hour12:false}).formatToParts(new Date()).forEach(function(x){p[x.type]=x.value;});}catch(e){return {open:false};}
+  var mins=(+p.hour%24)*60+(+p.minute),wk=['Mon','Tue','Wed','Thu','Fri'].indexOf(p.weekday)>=0;
+  var inHours=wk&&mins>=570&&mins<960;
+  var q=S.mkt['^GSPC'],fresh=q&&q.time?(Date.now()-q.time*1000)<45*60*1000:null;
+  return {open:inHours&&fresh!==false};
 }
+function renderStatus(){
+  var live=S.updated.indexOf('Updated')===0,ms=marketState();
+  $('mktState').textContent=ms.open?'Market open':'Market closed';
+  $('mktDot').classList.toggle('live',ms.open);
+  $('updated').textContent=live?('Live · '+(S.updatedAt?relTime(Date.now()-S.updatedAt):S.updated.replace('Updated: ',''))):('Snapshot · '+S.updated.replace('Sheet snapshot: ',''));
+  var q=S.mkt['^GSPC'];
+  $('asof').textContent=q&&q.time?(ms.open?'Live, may be delayed a few minutes':'Prices as of '+new Date(q.time*1000).toLocaleString('en-US',{timeZone:'America/New_York',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})+' ET'):'';
+}
+function renderMeta(){renderStatus();$('liveNotice').hidden=hasLive();}
 function render(){renderTabs();renderFilters();renderSortChips();renderColSel();renderTable();renderMeta();}
 function stamp(prefix){
   var d=new Date(),p=function(x){return String(x).padStart(2,'0');};
   S.updated=prefix+d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})+' '+p(d.getHours())+':'+p(d.getMinutes());
+  S.updatedAt=Date.now();
 }
 function tickClock(){
   var d=new Date();
   $('clock').textContent=d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})+' '+d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+  renderStatus();
 }
 
 // ---------- interactions ----------
@@ -940,13 +1168,14 @@ function moveRow(id,to){
   var name=TABNAME[to];
   if(dup){S.rows=S.rows.filter(function(x){return x!==r;});toast(r.ticker+' is already in '+name+', merged');}
   else{r.tab=to;toast('Moved '+r.ticker+' to '+name);}
-  save();render();
+  touch();render();
 }
 function jumpTo(id){
   var r=byId(id);if(!r)return;
   S.q='';$('q').value='';S.sector='';S.theme='';S.pinOnly=false;
   if(S.tab!==r.tab){S.tab=r.tab;schedule();}
   render();
+  var vr=visibleRows(),ix=vr.indexOf(r);if(ix>=S.limit){S.limit=ix+1;renderTable();}
   var el=document.querySelector('[data-id="'+id+'"]');if(!el)return;
   if(el.matches('.card')){S.open[id]=true;el.querySelector('.more').hidden=false;el.querySelector('.card-head').setAttribute('aria-expanded','true');}
   el.scrollIntoView({block:'center',behavior:'smooth'});
@@ -954,13 +1183,17 @@ function jumpTo(id){
 }
 function scrollToDash(){var d=$('dash');if(d)window.scrollTo({top:d.getBoundingClientRect().top+window.scrollY-52,behavior:'smooth'});}
 document.addEventListener('click',function(e){
-  var t=e.target.closest('[data-tab],[data-sort],[data-sortchip],[data-pinonly],[data-theme-pick],[data-mz],[data-mkr],[data-move],[data-del],[data-flag],[data-card],[data-edit],[data-datef],[data-pin],[data-detail],[data-jump],.js-refresh');
+  var t=e.target.closest('[data-tab],[data-sort],[data-sortchip],[data-pinonly],[data-theme-pick],[data-mz],[data-mkr],[data-move],[data-del],[data-flag],[data-card],[data-edit],[data-datef],[data-pin],[data-detail],[data-jump],[data-more],[data-moreall],[data-sym],[data-tour],.js-refresh');
   if(!t){if(!e.target.closest('#menuBtn,#mobNav'))$('mobNav').hidden=true;return;}
   if(t.classList.contains('js-refresh')){$('mobNav').hidden=true;refreshViaScript(tabRows(),false);return;}
+  if(t.dataset.tour){$('mobNav').hidden=true;startTour();return;}
+  if(t.dataset.more){S.limit+=pageSize();renderTable();return;}
+  if(t.dataset.moreall){S.limit=1e9;renderTable();return;}
+  if(t.dataset.sym){sgPick(t.dataset.sym);return;}
   if(t.dataset.tab){switchTab(t.dataset.tab);return;}
   if(t.dataset.jump){jumpTo(t.dataset.jump);return;}
   if(t.dataset.detail){openDetail(t.dataset.detail);return;}
-  if(t.dataset.pin){var pr=byId(t.dataset.pin);if(pr){pr.pin=pr.pin?0:1;save();renderTable();}return;}
+  if(t.dataset.pin){var pr=byId(t.dataset.pin);if(pr){pr.pin=pr.pin?0:1;touch();renderTable();}return;}
   if(t.dataset.sortchip){
     var k=t.dataset.sortchip;
     S.sort=(S.sort&&S.sort.k===k)?{k:k,dir:-S.sort.dir}:{k:k,dir:+t.dataset.dir};
@@ -990,9 +1223,9 @@ document.addEventListener('click',function(e){
       t.setAttribute('data-armed','1');var old=t.textContent;t.textContent='Delete?';
       setTimeout(function(){if(t.isConnected){t.removeAttribute('data-armed');t.textContent=old;}},3000);return;
     }
-    var r=byId(t.dataset.del);S.rows=S.rows.filter(function(x){return x!==r;});save();render();toast('Deleted '+(r?r.ticker:''));return;
+    var r=byId(t.dataset.del);S.rows=S.rows.filter(function(x){return x!==r;});touch();render();toast('Deleted '+(r?r.ticker:''));return;
   }
-  if(t.dataset.flag){var fr=byId(t.dataset.id);if(fr){fr[t.dataset.flag]=fr[t.dataset.flag]?0:1;save();renderTable();}return;}
+  if(t.dataset.flag){var fr=byId(t.dataset.id);if(fr){fr[t.dataset.flag]=fr[t.dataset.flag]?0:1;touch();renderTable();}return;}
   if(t.dataset.card){
     var id=t.dataset.card;S.open[id]=!S.open[id];
     var art=t.closest('.card');art.querySelector('.more').hidden=!S.open[id];t.setAttribute('aria-expanded',String(!!S.open[id]));return;
@@ -1011,7 +1244,7 @@ function startDateEdit(el){
   var inp=el.firstChild,done=false;inp.focus();inp.select();
   function finish(ok){
     if(done)return;done=true;
-    if(ok){(S.dates[S.tab]=S.dates[S.tab]||{})[k]=inp.value.trim().slice(0,8);save();}
+    if(ok){(S.dates[S.tab]=S.dates[S.tab]||{})[k]=inp.value.trim().slice(0,8);touch();}
     render();
   }
   inp.addEventListener('keydown',function(e){e.stopPropagation();if(e.key==='Enter')finish(true);else if(e.key==='Escape')finish(false);});
@@ -1031,8 +1264,8 @@ function startEdit(el){
       if(isNum){
         var n=v===''?null:num(v);
         if(v!==''&&n===null){toast('Please enter a number');}
-        else{r[f]=n;save();}
-      }else{r[f]=v.slice(0,f==='note'?120:60);if(f==='theme'||f==='sector'||f==='sub')r.thEdited=1;save();}
+        else{r[f]=n;touch();}
+      }else{r[f]=v.slice(0,f==='note'?120:60);if(f==='theme'||f==='sector'||f==='sub')r.thEdited=1;touch();}
     }
     render();
     if(!$('dtModal').hidden)renderDetail();
@@ -1047,7 +1280,7 @@ $('colList').addEventListener('change',function(e){
   if(!e.target.matches('input[data-col]'))return;
   var tab=S.tab,hidden=[];
   $('colList').querySelectorAll('input[data-col]').forEach(function(i){if(!i.checked)hidden.push(i.dataset.col);});
-  S.hidden=S.hidden||{};S.hidden[tab]=hidden;save();renderTable();
+  S.hidden=S.hidden||{};S.hidden[tab]=hidden;touch();renderTable();
 });
 MQ.addEventListener?MQ.addEventListener('change',renderTable):MQ.addListener(renderTable);
 
@@ -1193,7 +1426,7 @@ $('tpForm').addEventListener('submit',function(e){
   var row=tpRow;
   if(nsa!==null)row.sa=nsa;
   if(nft!==null)row.ft=nft;
-  save();closeTargetDialog();render();
+  touch();closeTargetDialog();render();
   toast(nsa===null&&nft===null?'Targets skipped':'Saved targets for '+row.ticker);
 });
 $('tpSkip').addEventListener('click',closeTargetDialog);
@@ -1203,13 +1436,17 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!$('tpModal
 // ---------- add a stock: ticker only, error if it cannot be fetched ----------
 $('addForm').addEventListener('submit',async function(e){
   e.preventDefault();
+  // If a suggestion is highlighted, the Add button adds that one rather than the half-typed text.
+  if(!$('sugg').hidden&&SG.idx>=0&&SG.items[SG.idx])$('f_ticker').value=SG.items[SG.idx].symbol;
   var tk=$('f_ticker').value.trim().toUpperCase();
-  if(!/^[A-Z0-9.\-=^]{1,12}$/.test(tk)){toast('Tickers may only use letters, numbers, . and -');return;}
+  if(!$('sugg').hidden&&SG.items.length&&SG.idx<0&&!SG.items.some(function(x){return x.symbol===tk;})){toast('Pick a result from the list, or type the exact ticker');return;}
+  sgClose();
+  if(!/^[A-Z0-9.\-=^]{1,12}$/.test(tk)){toast('Pick a company from the list, or type an exact ticker (letters, numbers, . and -)');return;}
   if(S.rows.some(function(r){return r.tab===S.tab&&r.ticker===tk;})){toast(tk+' is already in this list');return;}
   var other=S.tab==='lev'?null:S.rows.filter(function(r){return r.tab!==S.tab&&r.tab!=='lev'&&r.ticker===tk;})[0];
   if(other){toast(tk+' is already in '+TABNAME[other.tab]+', no need to add it again');return;}
   var row={id:'u'+Date.now(),tab:S.tab,ticker:tk,name:'',sector:'',theme:'',sub:'',link:'',price:null,d1:null,w1:null,m1:null,m3:null,m6:null,ytd:null,high:null,low:null,sa:null,ft:null,fee:null,int:0,conv:0,l2:'',s2:'',note:'',pin:0};
-  if(!hasLive()){S.rows.push(row);save();$('f_ticker').value='';render();toast('Added '+tk+', but live quotes are not connected so there is no price yet');openTargetDialog(row);return;}
+  if(!hasLive()){S.rows.push(row);touch();$('f_ticker').value='';render();toast('Added '+tk+', but live quotes are not connected so there is no price yet');openTargetDialog(row);return;}
   var added=false;
   var btn=$('addBtn');btn.disabled=true;btn.lastChild.textContent='Fetching…';
   S.rows.push(row);
@@ -1222,7 +1459,7 @@ $('addForm').addEventListener('submit',async function(e){
     }else{
       $('f_ticker').value='';toast('Added '+tk+(row.name?' ('+row.name+')':''));added=true;
     }
-  }finally{btn.disabled=false;btn.lastChild.textContent='Add stock';save();render();}
+  }finally{btn.disabled=false;btn.lastChild.textContent='Add stock';touch();render();}
   if(added)openTargetDialog(row);
 });
 
@@ -1268,8 +1505,8 @@ async function refreshMarket(){
     var res=await fetch(QURL+'?symbols='+encodeURIComponent(MARKETS.map(function(m){return m[0];}).join(',')));
     if(!res.ok)return;
     var j=await res.json();if(!j||typeof j.data!=='object')return;
-    MARKETS.forEach(function(m){var q=j.data[m[0]];if(q)S.mkt[m[0]]={price:q.price,d1:typeof q.d1==='number'?q.d1:null};});
-    renderMarkets();
+    MARKETS.forEach(function(m){var q=j.data[m[0]];if(q)S.mkt[m[0]]={price:q.price,d1:typeof q.d1==='number'?q.d1:null,time:q.time||0};});
+    renderMarkets();renderStatus();
   }catch(e){}
 }
 function setBusy(b){document.querySelectorAll('.js-refresh').forEach(function(x){x.disabled=b;});}
@@ -1282,12 +1519,16 @@ async function refreshViaScript(list,quiet){
   for(var i=0;i<gs.length;i+=40)chunks.push(gs.slice(i,i+40));
   async function one(chunk){
     var j=null;
-    try{
-      var res=await fetch(QURL+'?symbols='+encodeURIComponent(chunk.map(function(g){return g[0].ticker;}).join(',')));
-      if(!res.ok)throw new Error('http');
-      j=await res.json();
-      if(!j||typeof j.data!=='object')throw new Error('format');
-    }catch(e){stop='Could not reach the quote service. Check the URL and your connection, and open this page in a normal browser.';return;}
+    // The service occasionally errors on a cold start, so each batch gets one automatic retry.
+    for(var attempt=0;attempt<2&&!j;attempt++){
+      try{
+        var res=await fetch(QURL+'?symbols='+encodeURIComponent(chunk.map(function(g){return g[0].ticker;}).join(',')));
+        if(!res.ok)throw new Error('http');
+        j=await res.json();
+        if(!j||typeof j.data!=='object'){j=null;throw new Error('format');}
+      }catch(e){j=null;if(attempt===0)await sleep(1500);}
+    }
+    if(!j){stop='Could not reach the quote service. Check the URL and your connection, and open this page in a normal browser.';return;}
     chunk.forEach(function(rows){
       var tk=rows[0].ticker,q=j.data[tk];
       rows.forEach(function(r){
@@ -1341,25 +1582,522 @@ $('u_clear').addEventListener('click',function(){
 });
 $('k_auto').addEventListener('change',function(e){AUTO=e.target.checked;lsSet(AUTO_KEY,AUTO?'1':'0');});
 
+// ---------- company search (type a name, pick a ticker) ----------
+var SG={items:[],idx:-1,timer:null,seq:0,unsupported:false};
+function sgClose(){var u=$('sugg');u.hidden=true;u.innerHTML='';SG.idx=-1;SG.items=[];$('f_ticker').setAttribute('aria-expanded','false');$('f_ticker').removeAttribute('aria-activedescendant');}
+function sgShow(){
+  var u=$('sugg');
+  u.innerHTML=SG.items.length?SG.items.map(function(x,i){
+    return '<li role="option" id="sg'+i+'" data-sym="'+esc(x.symbol)+'" aria-selected="false"><b>'+esc(x.symbol)+'</b><span>'+esc(x.name)+'</span><small>'+esc((x.exch||'')+(x.type?' · '+x.type:''))+'</small></li>';
+  }).join(''):'<li class="st">No matches. Check the spelling or type the exact ticker.</li>';
+  u.hidden=false;$('f_ticker').setAttribute('aria-expanded','true');
+}
+function sgPick(sym){$('f_ticker').value=sym;sgClose();$('addForm').requestSubmit();}
+async function sgFetch(q){
+  var my=++SG.seq,u=$('sugg');
+  u.innerHTML='<li class="st">Searching…</li>';u.hidden=false;
+  try{
+    var res=await fetch(QURL+'?q='+encodeURIComponent(q));
+    var j=await res.json();
+    if(my!==SG.seq)return;
+    if(!j||!Array.isArray(j.results)){SG.unsupported=true;sgClose();return;}
+    SG.items=j.results.slice(0,8);SG.idx=-1;sgShow();
+  }catch(e){if(my===SG.seq)sgClose();}
+}
+$('f_ticker').addEventListener('input',function(){
+  var v=this.value.trim();clearTimeout(SG.timer);
+  if(v.length<2||!QURL||SG.unsupported){SG.seq++;sgClose();return;}
+  SG.timer=setTimeout(function(){sgFetch(v);},260);
+});
+$('f_ticker').addEventListener('keydown',function(e){
+  var u=$('sugg');
+  if(u.hidden||!SG.items.length){if(e.key==='Escape')sgClose();return;}
+  if(e.key==='ArrowDown'||e.key==='ArrowUp'){
+    e.preventDefault();
+    SG.idx=(SG.idx+(e.key==='ArrowDown'?1:-1)+SG.items.length)%SG.items.length;
+    u.querySelectorAll('li').forEach(function(li,i){li.setAttribute('aria-selected',String(i===SG.idx));});
+    this.setAttribute('aria-activedescendant','sg'+SG.idx);
+    var cur=$('sg'+SG.idx);if(cur&&cur.scrollIntoView)cur.scrollIntoView({block:'nearest'});
+  }else if(e.key==='Enter'&&SG.idx>=0){e.preventDefault();sgPick(SG.items[SG.idx].symbol);}
+  else if(e.key==='Escape'){sgClose();}
+});
+document.addEventListener('click',function(e){if(!e.target.closest('.combo'))sgClose();});
+
+// ---------- backup file and cloud sync ----------
+var SYNC={code:lsGet('stonk-sync-code')||'',on:lsGet('stonk-sync-on')==='1',mode:lsGet('stonk-sync-mode')||'',timer:null,busy:false,dirty:false,lastPull:0};
+if(SYNC.on&&!SYNC.mode)SYNC.mode=SYNC.code?'code':'';
+if(!SYNC.mode)SYNC.on=false;
+function syncReady(){return SYNC.on&&!!QURL&&(SYNC.mode==='google'||(SYNC.mode==='code'&&!!SYNC.code));}
+function setMode(m){SYNC.mode=m;if(m)lsSet('stonk-sync-mode',m);else lsDel('stonk-sync-mode');}
+// ----- Google sign-in -----
+var AUTH={token:'',exp:0,name:'',email:'',ready:false,loading:false,stored:false,waiters:[]};
+(function restoreAuth(){
+  try{
+    var a=JSON.parse(lsGet('stonk-auth')||'null');if(!a)return;
+    AUTH.name=a.name||'';AUTH.email=a.email||'';
+    if(a.tok&&a.exp>Date.now()/1000+60){AUTH.token=a.tok;AUTH.exp=a.exp;}else AUTH.stored=true;
+  }catch(e){}
+})();
+function jwtPayload(tok){
+  try{
+    var p=String(tok).split('.')[1].replace(/-/g,'+').replace(/_/g,'/');
+    while(p.length%4)p+='=';
+    return JSON.parse(new TextDecoder().decode(unb64(p)));
+  }catch(e){return null;}
+}
+function loadGis(){
+  if(!GOOGLE_CLIENT_ID||AUTH.ready||AUTH.loading)return;
+  if(window.google&&google.accounts&&google.accounts.id){gisInit();return;}
+  AUTH.loading=true;
+  var s=document.createElement('script');s.src='https://accounts.google.com/gsi/client';s.async=true;s.defer=true;
+  s.onload=function(){AUTH.loading=false;gisInit();};
+  s.onerror=function(){AUTH.loading=false;setMsg('syncMsg','Could not load Google sign-in. Check your connection or an ad blocker.');};
+  document.head.appendChild(s);
+}
+function gisInit(){
+  try{
+    google.accounts.id.initialize({client_id:GOOGLE_CLIENT_ID,callback:onCredential,auto_select:true,cancel_on_tap_outside:false,use_fedcm_for_prompt:true,itp_support:true});
+    AUTH.ready=true;
+    if(AUTH.stored&&!AUTH.token){try{google.accounts.id.prompt();}catch(e){}}
+    renderSync();
+  }catch(e){setMsg('syncMsg','Google sign-in could not start.');}
+}
+function renderGoogleButton(){
+  var el=$('gBtn');if(!el||!AUTH.ready||!window.google)return;
+  el.innerHTML='';
+  try{google.accounts.id.renderButton(el,{theme:'filled_black',size:'large',shape:'pill',text:'signin_with',logo_alignment:'left',width:Math.min(280,Math.max(200,(el.parentElement.clientWidth||260)))});}catch(e){}
+}
+async function ensureToken(){
+  if(AUTH.token&&AUTH.exp>Date.now()/1000+90)return AUTH.token;
+  if(!AUTH.ready){
+    loadGis();
+    var t0=Date.now();while(!AUTH.ready&&Date.now()-t0<8000)await sleep(150);
+  }
+  if(!AUTH.ready)throw new Error('signin');
+  await new Promise(function(res){AUTH.waiters.push(res);try{google.accounts.id.prompt();}catch(e){}setTimeout(res,9000);});
+  if(AUTH.token&&AUTH.exp>Date.now()/1000+90)return AUTH.token;
+  throw new Error('signin');
+}
+function onCredential(resp){
+  var tok=resp&&resp.credential,pl=tok&&jwtPayload(tok);
+  if(!pl||pl.aud!==GOOGLE_CLIENT_ID)return;   // the quote service verifies the token for real; this is only a sanity check
+  var wasOn=SYNC.on&&SYNC.mode==='google';
+  AUTH.token=tok;AUTH.exp=pl.exp;AUTH.name=pl.name||pl.email||'Google account';AUTH.email=pl.email||'';AUTH.stored=false;
+  lsSet('stonk-auth',JSON.stringify({name:AUTH.name,email:AUTH.email,exp:AUTH.exp,tok:tok}));
+  AUTH.waiters.splice(0).forEach(function(f){f();});
+  if(!wasOn)beginAccountSync();else{renderSync();if(SYNC.dirty)syncSchedule();}
+}
+async function acctCall(action,extra){
+  var token=await ensureToken(),res;
+  try{res=await fetch(QURL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(Object.assign({action:action,token:token},extra||{}))});}
+  catch(e){throw new Error('network');}
+  var j;try{j=await res.json();}catch(e){throw new Error('unsupported');}
+  if(j&&!('ok' in j))throw new Error('unsupported');
+  if(!j.ok&&(j.error==='bad_token'||j.error==='expired')){AUTH.token='';AUTH.exp=0;throw new Error('signin');}
+  if(!j.ok&&j.error==='not_configured')throw new Error('not_configured');
+  return j;
+}
+async function cloudGet(code){if(SYNC.mode==='google'&&!code)return acctCall('aget');return syncCall('GET',{code:code||SYNC.code});}
+async function cloudPut(data,savedAt,enc){
+  if(SYNC.mode==='google')return acctCall('aput',{data:data,savedAt:savedAt,enc:enc});
+  return syncCall('POST',{action:'put',code:SYNC.code,data:data,savedAt:savedAt,enc:enc});
+}
+async function cloudDel(){if(SYNC.mode==='google')return acctCall('adel');return syncCall('POST',{action:'delete',code:SYNC.code});}
+function seedMap(){var m={};seed().forEach(function(r){var k=(r.tab==='lev'?'L:':'')+r.ticker;if(!m[k])m[k]=r;});return m;}
+function blankRow(tab,tk){return {id:'',tab:tab,ticker:tk,name:'',sector:'',theme:'',sub:'',link:'',price:null,d1:null,w1:null,m1:null,m3:null,m6:null,ytd:null,high:null,low:null,sa:null,ft:null,fee:null,int:0,conv:0,l2:'',s2:'',note:'',pin:0};}
+var SKEYS=['name','sector','theme','sub','link','sa','ft','fee','int','conv','l2','s2','note','pin'];
+// compact = only what differs from the starter list (small enough to sync); otherwise everything (backup file).
+function userState(compact){
+  var sm=seedMap();
+  return {v:1,app:'stonk',savedAt:S.modAt||Date.now(),dates:S.dates,hidden:S.hidden,rows:S.rows.map(function(r){
+    var o={t:r.tab,k:r.ticker},s=sm[(r.tab==='lev'?'L:':'')+r.ticker];
+    SKEYS.forEach(function(k){
+      var v=r[k];
+      if(compact){
+        if(s&&!r.thEdited&&(k==='name'||k==='sector'||k==='theme'||k==='sub'||k==='link'||k==='fee'))return;
+        if(s&&(s[k]==null?null:s[k])===(v==null?null:v))return;
+        if(!s&&(v===''||v==null||v===0))return;
+        if(s&&(v===''||v==null)&&(s[k]===''||s[k]==null||s[k]===0))return;
+      }
+      o[k]=v;
+    });
+    if(r.thEdited)o.te=1;
+    return o;
+  })};
+}
+function cleanStr(v,n){return typeof v==='string'?v.slice(0,n):'';}
+function applyState(st){
+  if(!st||!Array.isArray(st.rows))throw new Error('format');
+  var sm=seedMap(),old={},seen={},rows=[];
+  S.rows.forEach(function(r){old[(r.tab==='lev'?'L:':'')+r.ticker]=r;});
+  st.rows.forEach(function(o,i){
+    if(!o||typeof o.k!=='string'||!/^[A-Z0-9.\-=^]{1,12}$/.test(o.k))return;
+    if(!TABS.some(function(x){return x.id===o.t;}))return;
+    var key=(o.t==='lev'?'L:':'')+o.k;
+    if(seen[o.t+'|'+o.k])return;seen[o.t+'|'+o.k]=1;
+    var s=sm[key],r=s?JSON.parse(JSON.stringify(s)):blankRow(o.t,o.k);
+    r.id='r'+Date.now().toString(36)+'_'+i;r.tab=o.t;r.ticker=o.k;
+    ['name','sector','theme','sub','l2','s2'].forEach(function(k){if(k in o)r[k]=cleanStr(o[k],60);});
+    if('note' in o)r.note=cleanStr(o.note,120);
+    if('link' in o)r.link=/^https:\/\//.test(o.link||'')?cleanStr(o.link,300):'';
+    ['sa','ft','fee'].forEach(function(k){if(k in o)r[k]=num(o[k]);});
+    ['int','conv','pin'].forEach(function(k){if(k in o)r[k]=o[k]?1:0;});
+    if(o.te)r.thEdited=1;
+    var ol=old[key];
+    if(ol)['price','d1','w1','m1','m3','m6','ytd','high','low','quoteAt','base'].forEach(function(k){if(ol[k]!=null)r[k]=ol[k];});
+    rows.push(r);
+  });
+  S.rows=rows;
+  if(st.dates&&typeof st.dates==='object'){
+    var nd=cloneDates();
+    ['watch','port'].forEach(function(tb){var d=st.dates[tb];if(d&&typeof d==='object'){nd[tb]={sa:cleanStr(d.sa,8),ft:cleanStr(d.ft,8)};}});
+    S.dates=nd;
+  }
+  S.hidden=(st.hidden&&typeof st.hidden==='object')?st.hidden:null;
+  S.sector='';S.theme='';S.pinOnly=false;
+  return rows.length;
+}
+function b64(buf){var s='',a=new Uint8Array(buf);for(var i=0;i<a.length;i+=8192)s+=String.fromCharCode.apply(null,a.subarray(i,i+8192));return btoa(s);}
+function unb64(s){var b=atob(s),a=new Uint8Array(b.length);for(var i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return a;}
+async function pack(str){
+  var bytes=new TextEncoder().encode(str);
+  if(window.CompressionStream){
+    var cs=new CompressionStream('gzip'),w=cs.writable.getWriter();w.write(bytes);w.close();
+    return {enc:'gz',data:b64(await new Response(cs.readable).arrayBuffer())};
+  }
+  return {enc:'raw',data:b64(bytes)};
+}
+async function unpack(enc,data){
+  var a=unb64(data);
+  if(enc==='gz'){var ds=new DecompressionStream('gzip'),w=ds.writable.getWriter();w.write(a);w.close();return new TextDecoder().decode(await new Response(ds.readable).arrayBuffer());}
+  return new TextDecoder().decode(a);
+}
+function genCode(){
+  var A='ABCDEFGHJKLMNPQRSTUVWXYZ23456789',a=new Uint8Array(16),s='';
+  crypto.getRandomValues(a);
+  for(var i=0;i<16;i++){s+=A[a[i]%32];if(i%4===3&&i<15)s+='-';}
+  return s;
+}
+function normCode(c){var x=String(c||'').toUpperCase().replace(/[^A-Z0-9]/g,'');return x.length===16?x.replace(/(.{4})/g,'$1-').slice(0,19):'';}
+async function syncCall(method,payload){
+  if(!QURL)throw new Error('nourl');
+  var res;
+  try{
+    res=method==='GET'?await fetch(QURL+'?sync=get&code='+encodeURIComponent(payload.code))
+      :await fetch(QURL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)});
+  }catch(e){throw new Error('network');}
+  var j;try{j=await res.json();}catch(e){throw new Error('unsupported');}
+  if(j&&!('ok' in j))throw new Error('unsupported');
+  return j;
+}
+function syncErr(e){
+  var m=(e&&e.message)||String(e);
+  return {signin:'Please sign in with Google again to keep syncing.',not_configured:'Google sign-in is not turned on in the quote service yet. Add your Client ID to the Apps Script and redeploy.',bad_token:'Google rejected that sign-in. Please try again.',expired:'Your sign-in expired. Please sign in again.',nourl:'Connect live quotes first. Sync uses the same Google service.',network:'Could not reach the service. Check your connection.',unsupported:'Your Google service needs the latest Apps Script to use sync. Redeploy it with the newest code.',full:'Sync storage is full. Delete an old cloud copy or ask the owner.',too_large:'Your list is too large to sync.',bad_code:'That code is not valid.',not_found:'No saved list found for that code.',http:'The service returned an error.'}[m]||('Sync failed: '+m);
+}
+function setMsg(id,msg){$(id).textContent=msg||'';}
+function renderSync(){
+  var g=!!GOOGLE_CLIENT_ID,gOn=g&&SYNC.on&&SYNC.mode==='google',cOn=SYNC.on&&SYNC.mode==='code';
+  $('gBox').hidden=!g;
+  $('gIn').hidden=!gOn;$('gOut').hidden=gOn;
+  if(gOn){$('gName').textContent=AUTH.name||'Signed in';$('gEmail').textContent=AUTH.email||'';$('gAv').textContent=(AUTH.name||AUTH.email||'?').charAt(0).toUpperCase();}
+  $('syncOff').hidden=cOn;$('syncOnBox').hidden=!cOn;$('syncCode').textContent=cOn?SYNC.code:'';
+  var cs=$('codeSync');if(!g){cs.open=true;cs.classList.add('plain');}else if(cOn)cs.open=true;
+  if(g&&!gOn)renderGoogleButton();
+}
+function syncSchedule(){
+  if(!syncReady())return;
+  SYNC.dirty=true;clearTimeout(SYNC.timer);
+  SYNC.timer=setTimeout(syncPush,2500);
+}
+async function syncPush(){
+  if(!syncReady())return;
+  if(SYNC.busy){SYNC.dirty=true;return;}
+  SYNC.busy=true;SYNC.dirty=false;setMsg('syncMsg','Saving to the cloud…');
+  try{
+    var st=userState(true),p=await pack(JSON.stringify(st));
+    var j=await cloudPut(p.data,st.savedAt,p.enc);
+    if(!j.ok)throw new Error(j.error||'failed');
+    setMsg('syncMsg','Synced at '+new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})+'.');
+  }catch(e){setMsg('syncMsg',syncErr(e));}
+  finally{SYNC.busy=false;if(SYNC.dirty)syncSchedule();}
+}
+// Returns 'applied' (cloud was newer), 'local' (this device is newer) or 'none' (nothing saved yet).
+async function syncPull(force,code){
+  var j=await cloudGet(code);
+  if(!j.ok){if(j.error==='not_found')return 'none';throw new Error(j.error||'failed');}
+  var st=JSON.parse(await unpack(j.enc,j.data));
+  if(force||(st.savedAt||0)>(S.modAt||0)+500){
+    var n=applyState(st);S.modAt=st.savedAt||Date.now();save();render();
+    if(hasLive())refreshViaScript(tabRows(),true);
+    return 'applied:'+n;
+  }
+  return 'local';
+}
+async function syncInit(){
+  if(!syncReady())return;
+  try{
+    var r=await syncPull(false);SYNC.lastPull=Date.now();
+    if(r.indexOf('applied')===0){setMsg('syncMsg','Loaded the latest list from the cloud.');toast('Synced from the cloud');}
+    else{if(r==='none'||(S.modAt||0)>0)syncSchedule();setMsg('syncMsg','Sync is on.');}
+  }catch(e){setMsg('syncMsg',syncErr(e));}
+}
+$('syncOn').addEventListener('click',async function(){
+  if(!QURL){setMsg('syncMsg',syncErr(new Error('nourl')));return;}
+  SYNC.code=genCode();SYNC.on=true;setMode('code');lsSet('stonk-sync-code',SYNC.code);lsSet('stonk-sync-on','1');
+  S.modAt=Date.now();save();renderSync();setMsg('syncMsg','Turning on sync…');
+  await syncPush();
+  if(/Sync storage|latest Apps Script|Connect live|Could not reach|too large|not valid/.test($('syncMsg').textContent)){
+    SYNC.on=false;setMode('');lsSet('stonk-sync-on','0');renderSync();
+  }else toast('Sync is on. Copy your code and keep it private.');
+});
+var connArmed=null;
+$('syncConnect').addEventListener('click',async function(){
+  var code=normCode($('syncCodeIn').value);
+  if(!code){setMsg('syncMsg','Codes look like ABCD-EFGH-JKLM-NPQR.');return;}
+  if(!QURL){setMsg('syncMsg',syncErr(new Error('nourl')));return;}
+  var btn=$('syncConnect');
+  if(connArmed!==code){
+    setMsg('syncMsg','Checking…');
+    try{
+      var j=await syncCall('GET',{code:code});
+      if(!j.ok){setMsg('syncMsg',j.error==='not_found'?'No saved list found for that code.':syncErr(new Error(j.error)));return;}
+      connArmed=code;btn.textContent='Replace this device’s list?';
+      setMsg('syncMsg','Found a saved list. Click again to replace the list on this device with it.');
+    }catch(e){setMsg('syncMsg',syncErr(e));}
+    return;
+  }
+  connArmed=null;btn.textContent='Connect';
+  try{
+    var r=await syncPull(true,code);
+    SYNC.code=code;SYNC.on=true;setMode('code');lsSet('stonk-sync-code',code);lsSet('stonk-sync-on','1');
+    $('syncCodeIn').value='';renderSync();setMsg('syncMsg','Connected. This device now follows that list.');toast('Connected to your synced list');
+  }catch(e){setMsg('syncMsg',syncErr(e));}
+});
+$('syncCodeIn').addEventListener('input',function(){connArmed=null;$('syncConnect').textContent='Connect';});
+$('syncNow').addEventListener('click',async function(){
+  setMsg('syncMsg','Syncing…');
+  try{var r=await syncPull(false);if(r.indexOf('applied')===0)toast('Loaded the latest list');else await syncPush();}
+  catch(e){setMsg('syncMsg',syncErr(e));}
+});
+$('syncStop').addEventListener('click',function(){SYNC.on=false;setMode('');lsSet('stonk-sync-on','0');renderSync();setMsg('syncMsg','Sync is off. Your cloud copy is still saved under your code.');});
+var delArmed=false;
+$('syncDel').addEventListener('click',async function(){
+  var b=$('syncDel');
+  if(!delArmed){delArmed=true;b.textContent='Delete for good?';setTimeout(function(){delArmed=false;b.textContent='Delete cloud copy';},4000);return;}
+  delArmed=false;b.textContent='Delete cloud copy';
+  try{await cloudDel();SYNC.on=false;SYNC.code='';setMode('');lsSet('stonk-sync-on','0');lsDel('stonk-sync-code');renderSync();setMsg('syncMsg','Cloud copy deleted. Sync is off.');}
+  catch(e){setMsg('syncMsg',syncErr(e));}
+});
+$('syncCopy').addEventListener('click',function(){
+  var done=function(){toast('Code copied');};
+  try{navigator.clipboard.writeText(SYNC.code).then(done,function(){selectCode();});}catch(e){selectCode();}
+  function selectCode(){var r=document.createRange();r.selectNodeContents($('syncCode'));var s=getSelection();s.removeAllRanges();s.addRange(r);toast('Press Ctrl/⌘+C to copy');}
+});
+document.addEventListener('visibilitychange',function(){
+  if(document.visibilityState==='visible'&&SYNC.on&&QURL&&Date.now()-SYNC.lastPull>60000){SYNC.lastPull=Date.now();syncPull(false).then(function(r){if(r.indexOf('applied')===0)toast('Synced from the cloud');}).catch(function(){});}
+});
+$('bkExport').addEventListener('click',function(){
+  var st=userState(false);st.exportedAt=new Date().toISOString();
+  var blob=new Blob([JSON.stringify(st,null,1)],{type:'application/json'}),a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);a.download='stonk-backup-'+new Date().toISOString().slice(0,10)+'.json';
+  document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(a.href);},3000);
+  setMsg('bkMsg','Backup downloaded ('+S.rows.length+' stocks).');
+});
+$('bkFile').addEventListener('change',function(e){
+  var f=e.target.files&&e.target.files[0];if(!f)return;
+  if(f.size>3e6){setMsg('bkMsg','That file is too large to be a Stonk backup.');e.target.value='';return;}
+  var fr=new FileReader();
+  fr.onload=function(){
+    try{
+      var st=JSON.parse(fr.result);
+      if(!st||st.app!=='stonk')throw new Error('format');
+      var n=applyState(st);touch();render();if(hasLive())refreshViaScript(tabRows(),true);
+      setMsg('bkMsg','Restored '+n+' stocks from the backup.');toast('Backup restored');
+    }catch(err){setMsg('bkMsg','That file is not a valid Stonk backup.');}
+  };
+  fr.readAsText(f);e.target.value='';
+});
+var resetArmed=false;
+$('bkReset').addEventListener('click',function(){
+  var b=$('bkReset');
+  if(!resetArmed){resetArmed=true;b.textContent='Replace my list?';setTimeout(function(){resetArmed=false;b.textContent='Restore starter list';},4000);return;}
+  resetArmed=false;b.textContent='Restore starter list';
+  S.rows=seed();S.dates=cloneDates();S.hidden=null;S.sector='';S.theme='';S.pinOnly=false;S.q='';$('q').value='';
+  touch();render();if(hasLive())refreshViaScript(tabRows(),true);toast('Starter list restored');
+});
+// First sign-in on a device: decide between the saved list and this device's list.
+async function beginAccountSync(){
+  var acct=AUTH.email||AUTH.name;
+  SYNC.on=true;setMode('google');lsSet('stonk-sync-on','1');renderSync();
+  setMsg('syncMsg','Checking your saved list…');
+  try{
+    var j=await cloudGet(),linked=lsGet('stonk-acct-linked')===acct;
+    if(!j.ok){
+      if(j.error==='not_found'){S.modAt=S.modAt||Date.now();save();await syncPush();lsSet('stonk-acct-linked',acct);toast('Signed in. Your list is now synced.');return;}
+      throw new Error(j.error||'failed');
+    }
+    var st=JSON.parse(await unpack(j.enc,j.data)),when=new Date(st.savedAt||j.savedAt||Date.now()).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
+    var cloudNewer=(st.savedAt||0)>(S.modAt||0)+500;
+    if((S.modAt||0)===0||(linked&&cloudNewer)){
+      applyState(st);S.modAt=st.savedAt||Date.now();save();render();if(hasLive())refreshViaScript(tabRows(),true);
+      lsSet('stonk-acct-linked',acct);setMsg('syncMsg','Loaded your saved list.');toast('Loaded your saved list');return;
+    }
+    if(linked){await syncPush();setMsg('syncMsg','Sync is on.');return;}
+    // both sides have content and this device has never been linked: let the person choose
+    AUTH.pending=st;
+    $('gChooseText').textContent='We found a list saved in your account (last saved '+when+'). Which one do you want to keep?';
+    $('gChoose').hidden=false;setMsg('syncMsg','');
+  }catch(e){setMsg('syncMsg',syncErr(e));if(e&&e.message==='signin'){SYNC.on=false;setMode('');lsSet('stonk-sync-on','0');renderSync();}}
+}
+$('gUseCloud').addEventListener('click',function(){
+  var st=AUTH.pending;if(!st)return;
+  applyState(st);S.modAt=st.savedAt||Date.now();save();render();if(hasLive())refreshViaScript(tabRows(),true);
+  lsSet('stonk-acct-linked',AUTH.email||AUTH.name);AUTH.pending=null;$('gChoose').hidden=true;setMsg('syncMsg','Loaded your saved list.');toast('Loaded your saved list');
+});
+$('gKeepLocal').addEventListener('click',async function(){
+  AUTH.pending=null;$('gChoose').hidden=true;S.modAt=Date.now();save();await syncPush();
+  lsSet('stonk-acct-linked',AUTH.email||AUTH.name);toast('Your saved list was replaced with this device’s list');
+});
+$('gNow').addEventListener('click',async function(){
+  setMsg('syncMsg','Syncing…');
+  try{var r=await syncPull(false);if(r.indexOf('applied')===0)toast('Loaded the latest list');else await syncPush();}
+  catch(e){setMsg('syncMsg',syncErr(e));}
+});
+function accountSignOut(msg){
+  try{if(window.google&&google.accounts)google.accounts.id.disableAutoSelect();}catch(e){}
+  AUTH.token='';AUTH.exp=0;AUTH.stored=false;AUTH.pending=null;lsDel('stonk-auth');
+  SYNC.on=false;setMode('');lsSet('stonk-sync-on','0');$('gChoose').hidden=true;renderSync();setMsg('syncMsg',msg||'');
+}
+$('gSignOut').addEventListener('click',function(){accountSignOut('Signed out. Your list stays on this device, and your cloud copy is still saved in your account.');});
+var gDelArmed=false;
+$('gDel').addEventListener('click',async function(){
+  var b=$('gDel');
+  if(!gDelArmed){gDelArmed=true;b.textContent='Delete for good?';setTimeout(function(){gDelArmed=false;b.textContent='Delete cloud copy';},4000);return;}
+  gDelArmed=false;b.textContent='Delete cloud copy';
+  try{await cloudDel();lsDel('stonk-acct-linked');accountSignOut('Cloud copy deleted and you are signed out. Your list stays on this device.');}
+  catch(e){setMsg('syncMsg',syncErr(e));}
+});
+// Load Google's sign-in script only when it is needed: when the person has signed in before, or when the sync box scrolls into view.
+if(GOOGLE_CLIENT_ID){
+  if(AUTH.stored||(SYNC.on&&SYNC.mode==='google'&&!AUTH.token))loadGis();
+  if('IntersectionObserver' in window){
+    var gio=new IntersectionObserver(function(es){if(es.some(function(x){return x.isIntersecting;})){loadGis();gio.disconnect();}},{rootMargin:'500px'});
+    gio.observe($('bkcard'));
+  }else loadGis();
+  // Also load it as soon as someone touches the sync box (covers browsers where the scroll check does not fire).
+  ['pointerdown','focusin'].forEach(function(ev){$('bkcard').addEventListener(ev,loadGis,{once:true,passive:true});});
+}
+renderSync();setTimeout(syncInit,800);
+
+// ---------- guided tour ----------
+var TOUR_STEPS=[
+  {sel:'#mkgrid',t:'Market snapshot',b:'Five key indexes with trend lines. Use 1M, 3M or 1Y to change the window. The status bar at the top tells you whether the US market is open.'},
+  {sel:'#stats',t:'Today at a glance',b:'How many stocks you track, the average upside to analyst targets, and the best and worst stock today. Click a name to jump straight to it.'},
+  {sel:'#themes',t:'Theme heat map',b:'Each block is a theme. Bigger means more stocks, redder means stronger. Click a block to filter the list to that theme.'},
+  {sel:'#addForm',t:'Add a stock',b:'Type a company name or a ticker, then pick a match. You can enter your own SA and FT targets right after adding.'},
+  {sel:'#tabs',t:'Your lists',b:'Watchlist, Holdings and Leveraged ETFs. On a computer, drag a row onto Holdings when you buy it; on a phone use the row buttons.'},
+  {sel:'.tool',t:'Search, sort and filter',b:'Search anything, sort by YTD, today’s move or distance to the 52-week high, choose which columns to show, and filter by sector or theme.'},
+  {sel:'#tbl tbody tr,#cards .card',t:'Work with a stock',b:'Click a ticker for a one-year chart and notes. Click an SA or FT cell to type your own target. The star pins a stock to the top.'},
+  {sel:'#bkcard',t:'Keep your list safe',b:'Your list is saved in this browser. Download a backup, or turn on sync to use the same list on all your devices.'}
+];
+var TOUR={i:0,steps:[],prevFocus:null,raf:0,on:false};
+function tourVisible(el){if(!el)return false;var d=el.closest('details');if(d&&!d.open)return false;if(el.closest('[hidden]'))return false;var r=el.getBoundingClientRect();return r.width>8&&r.height>8;}
+function startTour(){
+  TOUR.steps=TOUR_STEPS.filter(function(s){var el=document.querySelector(s.sel);return tourVisible(el);});
+  if(!TOUR.steps.length)return;
+  TOUR.i=0;TOUR.on=true;TOUR.prevFocus=document.activeElement;
+  $('tour').hidden=false;tourShow();
+}
+function tourEnd(done){
+  TOUR.on=false;$('tour').hidden=true;lsSet('stonk-tour','1');
+  var w=$('welcome');if(w&&!w.hidden&&done)toast('Tour complete');
+  if(TOUR.prevFocus&&TOUR.prevFocus.focus&&TOUR.prevFocus.isConnected)TOUR.prevFocus.focus();
+}
+function tourShow(){
+  var s=TOUR.steps[TOUR.i],el=document.querySelector(s.sel);
+  if(!tourVisible(el)){if(TOUR.i<TOUR.steps.length-1){TOUR.i++;tourShow();}else tourEnd(true);return;}
+  var mobile=window.matchMedia('(max-width:720px)').matches,r=el.getBoundingClientRect();
+  // bring the target into a comfortable spot (instantly, so the spotlight can be placed straight away)
+  // Wide blocks sit near the top so the card has room below; narrow ones (sidebar) are centred and the card goes beside them.
+  var wide=r.width>innerWidth*0.55;
+  var want=mobile?80:(wide?(r.height>innerHeight*0.55?90:110):Math.max(90,(innerHeight-Math.min(r.height,innerHeight-220))/2-40));
+  window.scrollTo({top:Math.max(0,window.scrollY+r.top-want),behavior:'auto'});
+  $('tourN').textContent='Step '+(TOUR.i+1)+' of '+TOUR.steps.length;
+  $('tourT').textContent=s.t;$('tourB').textContent=s.b;
+  $('tourDots').innerHTML=TOUR.steps.map(function(_,k){return '<i class="'+(k===TOUR.i?'on':'')+'"></i>';}).join('');
+  $('tourBack').hidden=TOUR.i===0;
+  $('tourNext').textContent=TOUR.i===TOUR.steps.length-1?'Done':'Next';
+  tourPlace();
+  $('tourNext').focus();
+}
+function tourPlace(){
+  if(!TOUR.on)return;
+  var s=TOUR.steps[TOUR.i],el=document.querySelector(s.sel);if(!el)return;
+  var r=el.getBoundingClientRect(),pad=8,hole=$('tourHole'),card=$('tourCard');
+  var top=Math.max(8,r.top-pad),bottom=Math.min(innerHeight-8,r.bottom+pad),left=Math.max(8,r.left-pad),right=Math.min(innerWidth-8,r.right+pad);
+  if(window.matchMedia('(max-width:720px)').matches)bottom=Math.min(bottom,top+innerHeight*0.55);
+  hole.style.left=left+'px';hole.style.top=top+'px';hole.style.width=Math.max(0,right-left)+'px';hole.style.height=Math.max(0,bottom-top)+'px';
+  if(window.matchMedia('(max-width:720px)').matches){card.style.left='';card.style.top='';return;}
+  var ch=card.offsetHeight,cw=card.offsetWidth,x=Math.min(Math.max(16,left),innerWidth-cw-16),y;
+  var clampY=function(v){return Math.min(Math.max(16,v),innerHeight-ch-16);};
+  if(innerHeight-bottom>=ch+20)y=bottom+14;                                   // below
+  else if(top>=ch+20)y=top-ch-14;                                              // above
+  else if(innerWidth-right>=cw+24){x=right+16;y=clampY(top);}                 // to the right
+  else if(left>=cw+24){x=left-cw-16;y=clampY(top);}                           // to the left
+  else{y=Math.max(16,innerHeight-ch-16);x=Math.min(Math.max(16,innerWidth-cw-16),Math.max(16,right-cw));}
+  card.style.left=x+'px';card.style.top=y+'px';
+}
+function tourSchedule(){if(!TOUR.on||TOUR.raf)return;TOUR.raf=requestAnimationFrame(function(){TOUR.raf=0;tourPlace();});}
+window.addEventListener('scroll',tourSchedule,{passive:true});
+window.addEventListener('resize',tourSchedule);
+$('tourNext').addEventListener('click',function(){if(TOUR.i>=TOUR.steps.length-1){tourEnd(true);}else{TOUR.i++;tourShow();}});
+$('tourBack').addEventListener('click',function(){if(TOUR.i>0){TOUR.i--;tourShow();}});
+$('tourSkip').addEventListener('click',function(){tourEnd(false);});
+document.addEventListener('keydown',function(e){
+  if(!TOUR.on)return;
+  if(e.key==='Escape'){e.preventDefault();tourEnd(false);}
+  else if(e.key==='ArrowRight'){e.preventDefault();$('tourNext').click();}
+  else if(e.key==='ArrowLeft'){e.preventDefault();$('tourBack').click();}
+  else if(e.key==='Tab'){
+    var f=[$('tourSkip'),$('tourBack'),$('tourNext')].filter(function(b){return !b.hidden;}),i=f.indexOf(document.activeElement);
+    e.preventDefault();f[(i+(e.shiftKey?-1:1)+f.length)%f.length].focus();
+  }
+});
+
 // smooth-scroll section links
 document.addEventListener('click',function(e){
   var a=e.target.closest('a[href^="#"]');if(!a)return;
   var id=a.getAttribute('href').slice(1);if(!id)return;
   var el=document.getElementById(id);if(!el)return;
   e.preventDefault();el.scrollIntoView({behavior:'smooth',block:'start'});
-  if(id==='settings')$('live').open=true;
 });
 
-// Background video: keep it muted and autoplaying with no controls; if the browser blocks autoplay, retry on first touch or scroll.
+// Background video: only on larger screens, normal connections and when motion is allowed. Otherwise a soft animated gradient is used instead.
 (function(){
-  var v=document.querySelector('.bgvid video');if(!v)return;
+  var v=document.querySelector('.bgvid video'),box=document.querySelector('.bgvid');if(!v)return;
+  var c=navigator.connection||{};
+  var reduce=window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+  var small=window.matchMedia('(max-width:820px)').matches||(window.matchMedia('(pointer:coarse)').matches&&window.innerWidth<1100);
+  var slow=c.saveData||/(^|-)2g$|3g/.test(c.effectiveType||'');
+  if(reduce||small||slow){v.remove();box.classList.add('aurora');return;}
+  v.src=v.getAttribute('data-src');
   v.controls=false;v.muted=true;v.defaultMuted=true;
   var go=function(){try{var p=v.play();if(p&&p.catch)p.catch(function(){});}catch(e){}};
   go();
   ['touchstart','pointerdown','scroll','keydown'].forEach(function(ev){window.addEventListener(ev,go,{passive:true,once:true});});
-  v.addEventListener('error',function(){v.style.display='none';});
+  v.addEventListener('error',function(){v.remove();box.classList.add('aurora');});
   document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible')go();});
 })();
+// Accordions (movers, theme map) are open on desktop and collapsed on phones.
+function syncAcc(){document.querySelectorAll('details.acc,details.tips').forEach(function(d){d.open=!MQ.matches;});}
+syncAcc();
+(MQ.addEventListener?MQ.addEventListener('change',syncAcc):MQ.addListener(syncAcc));
+// Welcome card for first-time visitors.
+if(FIRST){$('welcome').hidden=false;}
+$('wKeep').addEventListener('click',function(){lsSet('stonk-welcome','1');$('welcome').hidden=true;toast('Starter list kept');});
+$('wEmpty').addEventListener('click',function(){lsSet('stonk-welcome','1');$('welcome').hidden=true;S.rows=[];touch();render();toast('Starting with an empty list');});
+// Hide the quote-source settings when the page ships with a built-in service URL (add ?advanced=1 to the address to show them).
+if(QUOTE_URL&&!/[?&]advanced/.test(location.search))$('live').hidden=true;
 render();liveUI('');schedule();tickClock();setInterval(tickClock,30000);
 if(hasLive())setTimeout(function(){refreshViaScript(tabRows(),true);},400);
 })();
