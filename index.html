@@ -1157,10 +1157,71 @@ function tickClock(){
 }
 
 // ---------- interactions ----------
+// Cross-slide: every row slides sideways, odd rows one way and even rows the other. Old rows leave while new rows arrive,
+// and the list height eases from the old size to the new one so nothing below jumps.
+// The blocks above the list (overview, movers, toolbar) are given the height of the tallest tab, so switching tabs never moves the list.
+function stageEls(){
+  var w=document.querySelector('.win'),out=[],e=w,list=$('tbl').parentNode;
+  while(e&&e!==document.body){var sb=e.previousElementSibling;while(sb){if(sb.tagName!=='SCRIPT'&&sb.offsetHeight>0)out.push(sb);sb=sb.previousElementSibling;}e=e.parentNode;}
+  [].slice.call(list.children).forEach(function(c){if(['tbl','cards','moreRow','legend'].indexOf(c.id)<0)out.push(c);});
+  return out;
+}
+function lockHeights(){
+  if(!$('tbl'))return;
+  var els=stageEls(),orig=S.tab,keep={sector:S.sector,theme:S.theme,q:S.q,pin:S.pinOnly,sort:S.sort},max=els.map(function(){return 0;}),min=els.map(function(){return 1e9;});
+  var sx=window.scrollX,sy=window.scrollY;
+  els.forEach(function(e){e.style.minHeight='';});
+  function parts(){renderFilters();renderSortChips();renderColSel();renderStats();renderMovers();renderMosaic();renderMarkets();renderLabs();}
+  try{
+    TABS.forEach(function(t){S.tab=t.id;S.sector='';S.theme='';parts();els.forEach(function(e,i){max[i]=Math.max(max[i],e.offsetHeight);min[i]=Math.min(min[i],e.offsetHeight);});});
+  }catch(err){}
+  S.tab=orig;S.sector=keep.sector;S.theme=keep.theme;S.q=keep.q;S.pinOnly=keep.pin;S.sort=keep.sort;
+  try{parts();}catch(err){}
+  els.forEach(function(e,i){if(max[i]-min[i]>1)e.style.minHeight=max[i]+'px';});
+  window.scrollTo(sx,sy);
+}
+var lockTimer=0;
+function lockSoon(){clearTimeout(lockTimer);lockTimer=setTimeout(lockHeights,250);}
+function slideSwap(dir,change){
+  var el=MQ.matches?$('cards'):$('tbl');
+  var quiet=!el||el.hidden||!el.animate||(window.matchMedia&&matchMedia('(prefers-reduced-motion:reduce)').matches);
+  if(quiet){change();return;}
+  var p=el.parentNode,g=el.cloneNode(true),h0=el.offsetHeight,dx=22,lg=$('legend'),ph0=p.offsetHeight;
+  g.removeAttribute('id');g.setAttribute('aria-hidden','true');g.inert=true;
+  g.style.cssText='position:absolute;top:'+el.offsetTop+'px;left:'+el.offsetLeft+'px;width:'+el.offsetWidth+'px;height:'+h0+'px;overflow:hidden;pointer-events:none;margin:0';
+  if(getComputedStyle(p).position==='static')p.style.position='relative';
+  p.insertBefore(g,el);g.scrollTop=el.scrollTop;
+  change();
+  var nw=MQ.matches?$('cards'):$('tbl'),ease='cubic-bezier(.22,.8,.3,1)';
+  var rowSel=MQ.matches?'article':'tbody tr';
+  function run(root,keyframes,limit){
+    [].slice.call(root.querySelectorAll(rowSel),0,limit).forEach(function(r,i){
+      var s=(i%2?-1:1)*dx;
+      r.animate(keyframes(s),{duration:260,delay:Math.min(i,12)*14,easing:ease,fill:'both'});
+    });
+  }
+  run(g,function(s){return [{opacity:1,transform:'translateX(0)'},{opacity:0,transform:'translateX('+(-s)+'px)'}];},14);
+  run(nw,function(s){return [{opacity:0,transform:'translateX('+s+'px)'},{opacity:1,transform:'translateX(0)'}];},14);
+  // Ghost rows past the first 14 just fade with the container so nothing lingers.
+  g.animate([{opacity:1},{opacity:0}],{duration:200,fill:'both',easing:'ease-out'});
+  // Everything below the list starts where it was and glides to its new place, so the page does not jump.
+  var dh=ph0-p.offsetHeight;
+  if(Math.abs(dh)>1&&lg){
+    var mt=parseFloat(getComputedStyle(lg).marginTop)||0;
+    lg.animate([{marginTop:(mt+dh)+'px'},{marginTop:mt+'px'}],{duration:340,easing:ease});
+  }
+  var clean=function(){if(g.parentNode)g.parentNode.removeChild(g);};
+  setTimeout(clean,520);
+}
 function switchTab(t){
-  S.tab=t;S.sector='';S.theme='';S.pinOnly=false;
-  if(t==='lev'&&S.sort&&LEV_BAD.indexOf(S.sort.k)>=0)S.sort={k:'ytd',dir:-1};
-  render();schedule();tabRefresh();
+  var ids=TABS.map(function(x){return x.id;}),dir=ids.indexOf(t)>=ids.indexOf(S.tab)?1:-1,same=t===S.tab;
+  var go=function(){
+    S.tab=t;S.sector='';S.theme='';S.pinOnly=false;
+    if(t==='lev'&&S.sort&&LEV_BAD.indexOf(S.sort.k)>=0)S.sort={k:'ytd',dir:-1};
+    render();
+  };
+  if(same)go();else slideSwap(dir,go);
+  schedule();tabRefresh();
 }
 function moveRow(id,to){
   var r=byId(id);if(!r||r.tab===to)return;
@@ -1282,7 +1343,7 @@ $('colList').addEventListener('change',function(e){
   $('colList').querySelectorAll('input[data-col]').forEach(function(i){if(!i.checked)hidden.push(i.dataset.col);});
   S.hidden=S.hidden||{};S.hidden[tab]=hidden;touch();renderTable();
 });
-MQ.addEventListener?MQ.addEventListener('change',renderTable):MQ.addListener(renderTable);
+MQ.addEventListener?MQ.addEventListener('change',function(){renderTable();lockSoon();}):MQ.addListener(function(){renderTable();lockSoon();});
 
 // Desktop: drag a row onto a list in the sidebar to move it between Watchlist and Holdings
 var dragId=null;
@@ -1549,7 +1610,7 @@ async function refreshViaScript(list,quiet){
   }finally{running=false;setBusy(false);}
   lastRun=Date.now();tabRun[startTab]=lastRun;
   if(ok)stamp('Updated: ');
-  save();render();
+  save();render();lockSoon();
   if(S.tab!==startTab)setTimeout(tabRefresh,0);
   liveUI(stop||('Done: '+ok+' updated'+(bad?', '+bad+' failed (marked ⚠ in the table)':'')+'.'));
   if(!quiet||stop)toast(stop?'Refresh failed. See the note at the bottom of the page.':('Updated '+ok+' stocks'+(bad?', '+bad+' failed':'')));
@@ -2098,7 +2159,7 @@ $('wKeep').addEventListener('click',function(){lsSet('stonk-welcome','1');$('wel
 $('wEmpty').addEventListener('click',function(){lsSet('stonk-welcome','1');$('welcome').hidden=true;S.rows=[];touch();render();toast('Starting with an empty list');});
 // Hide the quote-source settings when the page ships with a built-in service URL (add ?advanced=1 to the address to show them).
 if(QUOTE_URL&&!/[?&]advanced/.test(location.search))$('live').hidden=true;
-render();liveUI('');schedule();tickClock();setInterval(tickClock,30000);
+render();lockSoon();window.addEventListener('resize',lockSoon);liveUI('');schedule();tickClock();setInterval(tickClock,30000);
 if(hasLive())setTimeout(function(){refreshViaScript(tabRows(),true);},400);
 })();
 </script>
